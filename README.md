@@ -31,7 +31,7 @@ Cada carpeta corresponde a una parte importante del proyecto:
 - 🟢 *Node.js*  
 - 🗄 *Prisma (ORM y base de datos)*  
 - 🔷 *TypeScript*  
-- 🎨 *CSS / TailwindCSS (si aplica)*  
+- 🎨 *CSS / TailwindCSS*  
 
 ---
 
