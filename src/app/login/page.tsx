@@ -16,13 +16,17 @@ export default function LoginPage() {
     email: "",
     password: "",
   })
+  const [mensaje, setMensaje] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setMensaje(null)
+    setError(null)
 
     try {
-      const res = await fetch("/api/auth/login", {
+      const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -31,20 +35,20 @@ export default function LoginPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        alert(data.error || "Error al iniciar sesión")
+        setError(data.error || "Error al iniciar sesión")
         return
       }
 
+      setMensaje(data.message || "Inicio de sesión exitoso ✅")
       console.log("✅ Login exitoso:", data.usuario)
 
-      // Guardar usuario en localStorage
-      localStorage.setItem("usuario", JSON.stringify(data.usuario))
-
-      // Redirigir al home (ajusta la ruta si quieres)
-      window.location.href = "/"
+      // redirige al home después de 1.5 segundos
+      setTimeout(() => {
+        window.location.href = "/"
+      }, 1500)
     } catch (err) {
       console.error("❌ Error:", err)
-      alert("Ocurrió un error al iniciar sesión")
+      setError("Ocurrió un error al iniciar sesión")
     } finally {
       setLoading(false)
     }
@@ -127,6 +131,14 @@ export default function LoginPage() {
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
                 {loading ? "Iniciando..." : "Iniciar Sesión"}
               </Button>
+
+              {/* 🔹 Mensajes bonitos */}
+              {mensaje && (
+                <p className="text-green-600 text-center font-medium">{mensaje}</p>
+              )}
+              {error && (
+                <p className="text-red-600 text-center font-medium">{error}</p>
+              )}
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">

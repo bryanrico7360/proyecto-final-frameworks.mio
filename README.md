@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🛒 Proyecto EcoShop
 
-## Getting Started
+Aplicación web para la gestión de productos y usuarios en una tienda en línea.  
+Incluye el *registro de usuarios* conectado a una base de datos y una *interfaz visual amigable* para la interacción con el sistema.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## 📌 Objetivo del Repositorio
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Practicar el desarrollo de *aplicaciones web modernas*.  
+- Implementar el *registro de usuarios* con conexión a base de datos.  
+- Mejorar el diseño de la interfaz y la *experiencia del usuario*.  
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Estructura
 
-## Learn More
+Cada carpeta corresponde a una parte importante del proyecto:
 
-To learn more about Next.js, take a look at the following resources:
+- *prisma/* → Configuración de base de datos y modelos.  
+- *público/* → Archivos estáticos (imágenes, estilos, etc.).  
+- *Fuente/* → Código fuente principal de la aplicación.  
+- *README.md* → Documentación del proyecto.  
+- Archivos de configuración → (package.json, tsconfig.json, etc.).  
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛠 Tecnologías Usadas
 
-## Deploy on Vercel
+- ⚡ *Next.js / React*  
+- 🟢 *Node.js*  
+- 🗄 *Prisma (ORM y base de datos)*  
+- 🔷 *TypeScript*  
+- 🎨 *CSS / TailwindCSS (si aplica)*  
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+✨ Proyecto creado con fines educativos y de práctica.
