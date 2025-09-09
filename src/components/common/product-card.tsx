@@ -71,7 +71,10 @@ export function ProductCard({ product, className }: ProductCardProps) {
 
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
         <span className="text-lg font-bold text-primary">
-          ${Number(product.price).toFixed(2)}
+          {new Intl.NumberFormat("es-CO", {
+            style: "currency",
+            currency: "COP",
+          }).format(Number(product.price))}
         </span>
         <Button
           onClick={handleAddToCart}

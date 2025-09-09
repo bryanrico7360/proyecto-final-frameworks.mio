@@ -15,6 +15,7 @@ export default function ProductsPage() {
       try {
         const res = await fetch("/api/productos")
         const data = await res.json()
+        console.log("📦 Productos recibidos:", data)
         setProducts(data)
       } catch (error) {
         console.error("❌ Error al cargar productos:", error)
