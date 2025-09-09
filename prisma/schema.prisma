@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model usuarios {
+  id         Int        @id @default(autoincrement())
+  name       String     @db.VarChar(100)
+  email      String     @unique @db.VarChar(100)
+  password   String
+  role        String?    @db.VarChar(20)
+  created_at DateTime?  @default(now()) @db.Timestamp(6)
+  clientes   clientes[]
+}
+
+model clientes {
+  id         Int       @id @default(autoincrement())
+  usuario_id Int?
+  address    String?
+  phone      String?   @db.VarChar(20)
+  usuarios   usuarios? @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  pedidos    pedidos[]
+}
+
+model detalles_pedido {
+  id          Int        @id @default(autoincrement())
+  pedido_id   Int?
+  producto_id Int?
+  cantidad    Int
+  subtotal    Decimal    @db.Decimal(10, 2)
+  pedidos     pedidos?   @relation(fields: [pedido_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  productos   productos? @relation(fields: [producto_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model devoluciones {
+  id         Int       @id @default(autoincrement())
+  pedido_id  Int?
+  reason     String?
+  created_at DateTime? @default(now()) @db.Timestamp(6)
+  pedidos    pedidos?  @relation(fields: [pedido_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model pedidos {
+  id              Int               @id @default(autoincrement())
+  cliente_id      Int?
+  total           Decimal?          @default(0) @db.Decimal(10, 2)
+  status          String?           @default("pending") @db.VarChar(20)
+  created_at      DateTime?         @default(now()) @db.Timestamp(6)
+  detalles_pedido detalles_pedido[]
+  devoluciones    devoluciones[]
+  clientes        clientes?         @relation(fields: [cliente_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model productos {
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(100)
+  description     String?
+  price           Decimal           @db.Decimal(10, 2)
+  stock           Int               @default(0)
+  detalles_pedido detalles_pedido[]
+}
