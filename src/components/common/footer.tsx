@@ -45,11 +45,11 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <Phone className="w-4 h-4" />
-                <span className="text-sm">+1 (555) 123-4567</span>
+                <span className="text-sm">+57 (324) 123-4567</span>
               </div>
               <div className="flex items-center space-x-2 text-muted-foreground">
                 <MapPin className="w-4 h-4" />
-                <span className="text-sm">Ciudad, País</span>
+                <span className="text-sm">Villavicencio, Colombia</span>
               </div>
             </div>
           </div>
