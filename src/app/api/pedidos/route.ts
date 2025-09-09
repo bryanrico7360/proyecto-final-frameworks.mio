@@ -1,38 +1,85 @@
-import prisma from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import { prisma } from "@/lib/prisma"
 
-// GET → obtener todos los productos
-export async function GET() {
-  try {
-    const productos = await prisma.productos.findMany()
-    return NextResponse.json(productos, { status: 200 })
-  } catch (error: any) {
-    console.error("❌ Error GET productos:", error)
-    return NextResponse.json({ error: "Error al obtener productos" }, { status: 500 })
-  }
-}
-
-// POST → crear un nuevo producto
 export async function POST(req: Request) {
   try {
-    const data = await req.json()
+    const { userId, items } = await req.json()
 
-    if (!data.name || !data.price) {
-      return NextResponse.json({ error: "Faltan campos obligatorios" }, { status: 400 })
+    // 1. Buscar el cliente relacionado al usuario
+    const cliente = await prisma.clientes.findFirst({
+      where: { usuario_id: userId }, // 👈 findFirst en lugar de findUnique
+    })
+
+    if (!cliente) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 400 }
+      )
     }
 
-    const nuevoProducto = await prisma.productos.create({
+    // 2. Crear pedido
+    const pedido = await prisma.pedidos.create({
       data: {
-        name: data.name,
-        description: data.description || "",
-        price: data.price,
-        stock: data.stock || 0,
+        cliente_id: cliente.id,
+        total: 0,
+        status: "pending",
       },
     })
 
-    return NextResponse.json(nuevoProducto, { status: 201 })
-  } catch (error: any) {
-    console.error("❌ Error POST productos:", error)
-    return NextResponse.json({ error: "Error al crear producto" }, { status: 500 })
+    let total = 0
+
+    // 3. Insertar detalles y actualizar stock
+    for (const item of items) {
+      const producto = await prisma.productos.findUnique({
+        where: { id: item.id },
+      })
+
+      if (!producto || producto.stock < item.quantity) {
+        return NextResponse.json(
+          { error: `Stock insuficiente para ${item?.name || "Producto"}` },
+          { status: 400 }
+        )
+      }
+
+      // 👇 Convertir Decimal a número
+      const precio = Number(producto.price)
+      const subtotal = precio * item.quantity
+      total += subtotal
+
+      await prisma.detalles_pedido.create({
+        data: {
+          pedido_id: pedido.id,
+          producto_id: producto.id,
+          cantidad: item.quantity,
+          subtotal,
+        },
+      })
+
+      await prisma.productos.update({
+        where: { id: producto.id },
+        data: { stock: producto.stock - item.quantity },
+      })
+    }
+
+    // 4. Actualizar total del pedido
+    await prisma.pedidos.update({
+      where: { id: pedido.id },
+      data: { total, status: "confirmed" },
+    })
+
+    // 5. Retornar productos actualizados
+    const productos = await prisma.productos.findMany()
+
+    return NextResponse.json({
+      message: "✅ Pedido realizado con éxito",
+      pedidoId: pedido.id,
+      productos,
+    })
+  } catch (err) {
+    console.error("Error en pedido:", err)
+    return NextResponse.json(
+      { error: "Error procesando el pedido" },
+      { status: 500 }
+    )
   }
 }

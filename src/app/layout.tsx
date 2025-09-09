@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { Navbar } from "@/components/common/navbar"
 import { Footer } from "@/components/common/footer"
 import { CartProvider } from "@/contexts/cart-context"
+import { AuthProvider } from "@/contexts/auth-context"   
 import { Suspense } from "react"
 import "./globals.css"
 
@@ -23,13 +24,15 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
-        <CartProvider>
-          <Suspense fallback={<div>Loading...</div>}>
-            <Navbar />
-            <main className="min-h-screen pt-16">{children}</main>
-            <Footer />
-          </Suspense>
-        </CartProvider>
+        <AuthProvider>
+          <CartProvider>
+            <Suspense fallback={<div>Loading...</div>}>
+              <Navbar />
+              <main className="min-h-screen pt-16">{children}</main>
+              <Footer />
+            </Suspense>
+          </CartProvider>
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

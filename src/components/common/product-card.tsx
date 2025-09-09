@@ -7,12 +7,13 @@ import { Badge } from "@/components/ui/badge"
 import { ShoppingCart } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useCart } from "@/contexts/cart-context"
+import { useAuth } from "@/contexts/auth-context"  // 👈 importamos el contexto
 
 export interface Product {
   id: number
   name: string
   description: string
-  price: number
+  price: string | number  
   stock: number
 }
 
@@ -23,17 +24,25 @@ interface ProductCardProps {
 
 export function ProductCard({ product, className }: ProductCardProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const { addItem } = useCart()
+  const { addToCart } = useCart()
+  const { user } = useAuth()   // 👈 obtenemos el usuario
 
   const handleAddToCart = async () => {
+    if (!user) {
+      // 👈 si no hay usuario, redirige a login
+      window.location.href = "/login"
+      return
+    }
+
     setIsLoading(true)
     await new Promise((resolve) => setTimeout(resolve, 500))
-    addItem({
-      id: product.id.toString(),
+    addToCart({
+      id: product.id,
       name: product.name,
-      price: product.price,
+      price: Number(product.price),
       quantity: 1,
     })
+
     setIsLoading(false)
   }
 
@@ -61,7 +70,9 @@ export function ProductCard({ product, className }: ProductCardProps) {
       </CardContent>
 
       <CardFooter className="p-4 pt-0 flex items-center justify-between">
-        <span className="text-lg font-bold text-primary">${product.price.toFixed(2)}</span>
+        <span className="text-lg font-bold text-primary">
+          ${Number(product.price).toFixed(2)}
+        </span>
         <Button
           onClick={handleAddToCart}
           disabled={product.stock <= 0 || isLoading}

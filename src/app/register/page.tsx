@@ -1,13 +1,19 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 import { Eye, EyeOff, User, Mail, Lock, MapPin, Phone } from "lucide-react"
 
 export default function RegisterPage() {
@@ -20,64 +26,82 @@ export default function RegisterPage() {
     phone: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [mensaje, setMensaje] = useState<string | null>(null) // 👈 mensaje de éxito
+  const [errorGeneral, setErrorGeneral] = useState<string | null>(null) // 👈 error general
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {}
+  const newErrors: Record<string, string> = {}
 
-    if (!formData.name.trim()) {
-      newErrors.name = "El nombre es requerido"
-    }
-
-    if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido"
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "El email no es válido"
-    }
-
-    if (!formData.password) {
-      newErrors.password = "La contraseña es requerida"
-    } else if (formData.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres"
-    }
-
-    if (!formData.address.trim()) {
-      newErrors.address = "La dirección es requerida"
-    }
-
-    if (!formData.phone.trim()) {
-      newErrors.phone = "El teléfono es requerido"
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
+  if (!formData.name.trim()) {
+    newErrors.name = "El nombre es requerido"
   }
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault()
-  if (validateForm()) {
-    try {
+  if (!formData.email.trim()) {
+    newErrors.email = "El email es requerido"
+  } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    newErrors.email = "El email no es válido"
+  }
+
+  if (!formData.password) {
+    newErrors.password = "La contraseña es requerida"
+  } else if (formData.password.length < 6) {
+    newErrors.password = "La contraseña debe tener al menos 6 caracteres"
+  }
+
+  if (!formData.address.trim()) {
+    newErrors.address = "La dirección es requerida"
+  }
+
+  if (!formData.phone.trim()) {
+    newErrors.phone = "El teléfono es requerido"
+  } else if (!/^\d+$/.test(formData.phone)) {
+    newErrors.phone = "El teléfono solo puede contener números"
+  } else if (Number(formData.phone) <= 0) {
+    newErrors.phone = "El teléfono no puede ser negativo ni cero"
+  } else if (formData.phone.length > 10) {
+    newErrors.phone = "El teléfono no puede tener más de 10 dígitos"
+  }
+
+  setErrors(newErrors)
+  return Object.keys(newErrors).length === 0
+}
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setMensaje(null)
+    setErrorGeneral(null)
+
+    if (validateForm()) {
+      try {
         const res = await fetch("/api/usuarios", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(formData),
-    })
+        })
 
+        const data = await res.json()
 
-      if (!res.ok) {
-        throw new Error("Error en el registro")
+        if (!res.ok) {
+          setErrorGeneral(data.error || "Error en el registro")
+          return
+        }
+
+        // ✅ Mensaje de éxito
+        setMensaje("Cuenta creada exitosamente 🎉")
+
+        // Opcional: limpiar formulario
+        setFormData({
+          name: "",
+          email: "",
+          password: "",
+          address: "",
+          phone: "",
+        })
+      } catch (err) {
+        setErrorGeneral("Ocurrió un error en el registro")
       }
-
-      const data = await res.json()
-      console.log("Usuario registrado:", data)
-
-      // Aquí puedes redirigir al login o mostrar un mensaje
-      // router.push("/login")
-    } catch (err) {
-      console.error("Error:", err)
     }
   }
-}
-
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -85,7 +109,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       ...formData,
       [name]: value,
     })
-    // Clear error when user starts typing
+    // Limpiar error al escribir
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -104,16 +128,21 @@ const handleSubmit = async (e: React.FormEvent) => {
             </div>
           </div>
           <h1 className="text-3xl font-bold text-foreground">Únete a EcoShop</h1>
-          <p className="text-muted-foreground mt-2">Crea tu cuenta y comienza a comprar</p>
+          <p className="text-muted-foreground mt-2">
+            Crea tu cuenta y comienza a comprar
+          </p>
         </div>
 
         <Card className="shadow-lg border-0 bg-card/50 backdrop-blur">
           <CardHeader className="space-y-1">
             <CardTitle className="text-2xl font-bold text-center">Crear Cuenta</CardTitle>
-            <CardDescription className="text-center">Completa tus datos para registrarte</CardDescription>
+            <CardDescription className="text-center">
+              Completa tus datos para registrarte
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Nombre */}
               <div className="space-y-2">
                 <Label htmlFor="name">Nombre Completo</Label>
                 <div className="relative">
@@ -126,12 +155,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.name}
                     onChange={handleInputChange}
                     className={`pl-10 ${errors.name ? "border-destructive" : ""}`}
-                    required
                   />
                 </div>
                 {errors.name && <p className="text-sm text-destructive">{errors.name}</p>}
               </div>
 
+              {/* Email */}
               <div className="space-y-2">
                 <Label htmlFor="email">Correo Electrónico</Label>
                 <div className="relative">
@@ -144,12 +173,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.email}
                     onChange={handleInputChange}
                     className={`pl-10 ${errors.email ? "border-destructive" : ""}`}
-                    required
                   />
                 </div>
                 {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
               </div>
 
+              {/* Password */}
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
                 <div className="relative">
@@ -162,7 +191,6 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.password}
                     onChange={handleInputChange}
                     className={`pl-10 pr-10 ${errors.password ? "border-destructive" : ""}`}
-                    required
                   />
                   <Button
                     type="button"
@@ -181,6 +209,7 @@ const handleSubmit = async (e: React.FormEvent) => {
                 {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
               </div>
 
+              {/* Address */}
               <div className="space-y-2">
                 <Label htmlFor="address">Dirección</Label>
                 <div className="relative">
@@ -193,12 +222,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.address}
                     onChange={handleInputChange}
                     className={`pl-10 ${errors.address ? "border-destructive" : ""}`}
-                    required
                   />
                 </div>
                 {errors.address && <p className="text-sm text-destructive">{errors.address}</p>}
               </div>
 
+              {/* Phone */}
               <div className="space-y-2">
                 <Label htmlFor="phone">Teléfono</Label>
                 <div className="relative">
@@ -211,15 +240,19 @@ const handleSubmit = async (e: React.FormEvent) => {
                     value={formData.phone}
                     onChange={handleInputChange}
                     className={`pl-10 ${errors.phone ? "border-destructive" : ""}`}
-                    required
                   />
                 </div>
                 {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
               </div>
 
+              {/* Botón */}
               <Button type="submit" className="w-full" size="lg">
                 Crear Cuenta
               </Button>
+
+              {/* Mensajes */}
+              {mensaje && <p className="text-green-600 text-center">{mensaje}</p>}
+              {errorGeneral && <p className="text-red-600 text-center">{errorGeneral}</p>}
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4">
